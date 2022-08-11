@@ -2,44 +2,115 @@ const {Client} = require("@notionhq/client")
 
 const notion = new Client({auth: process.env.NOTION_API_KEY})
 
+var properties = [];
+
 async function getDatabase() {
     const response = await notion.databases.retrieve({database_id: process.env.NOTION_DATABASE_ID})
-    console.log(response);
     return response;
 }
 
+async function getProperties() {
+    //const database = await getDatabase();
+    return await getDatabase().then(res => {return res.properties;});
+}
+
+async function getPropertiesID() {
+    const properties = await getProperties();
+    //console.log(properties)
+    return Object.values(properties).map(property => {return property.id});
+}
+
+async function getSortedDatabase() {
+
+}
+
+async function makeSortingConditions() {
+    var conditions = []
+    await properties.then(res => res.forEach(property => conditions.push({property: property, direction: "ascending"})))   
+    return conditions;
+}
 async function getDatabaseItemsBy(property, reverse = false) {
+    let hasMoreItems = true;
+    
     const response = await notion.databases.query({database_id: process.env.NOTION_DATABASE_ID, sorts: [{
         property: property,
         direction: reverse ? "descending" : "ascending"
-    },]
+    }]
     })
     //console.log(response);
     return response; 
 }
 
-async function removeDuplicates() {
-    const items = await getDatabaseItemsBy("Date").then(res => {return res.results.map(x => {return {id: x.id, properties: x.properties}})});
-    if (items.length < 2) {
-        return;
+async function getDatabaseItems() {
+    let hasMoreItems = true;
+    var res = [];
+    var cursor;
+    while (hasMoreItems) {
+        var q = await notion.databases.query({database_id: process.env.NOTION_DATABASE_ID, sorts: await makeSortingConditions(), start_cursor: cursor})
+        Array.prototype.push.apply(res, q.results);
+        //console.log(res);
+        hasMoreItems = q.has_more;
+        if (hasMoreItems) {
+            var cursor = q.next_cursor;
+        }
     }
-    i = 0;
-    j = 1;
+    //console.log(res.map(x => {return {id:x.id, url:x.url}}));
+    return res.map(x => {return x.id});
+    
+}
+
+async function removeDuplicates() {
+    
+    //const items = await getDatabaseItemsBy("Date").then(res => {return res.results.map(x => {return {id: x.id, properties: x.properties}})});
+    const items = await getDatabaseItems();
+
+    /*
+    const property = await properties.then(res =>{return res[0]});   
+    for (const element of items) {
+        await notion.pages.properties.retrieve({page_id:element, property_id:property}).then(res => console.log(res))
+    }
+    return
+    */
+    var i = 0;
+    var j = 1;
+
     while (j < items.length) {
-        current = items[i];
-        next = items[j];
-        await hasSameProperities(current, next).then(res => {if (res) {notion.blocks.delete({block_id: next.id});}})
-        i += 1;
+        var current = items[i];
+        var next = items[j];
+        console.log(current);
+        var isSame = await hasSameProperities(current, next)
+        if (isSame) {
+            notion.blocks.delete({block_id: next})
+        } else {
+            i = j;
+        }
         j += 1;
     }
 }
 
 async function hasSameProperities(first_item, second_item) {
+    const props = await properties;
+    for (const property of props) {
+        try {
+            const first = await notion.pages.properties.retrieve({ page_id: first_item, property_id: property });
+            const second = await notion.pages.properties.retrieve({ page_id: second_item, property_id: property });
+            if (!isEqual(first, second)) {
+                return false;
+            }
+        } catch {
+            console.log("error")
+            return false;
+        }
+    }
+    return true;
+    
+    //TODO: remove first_item.properities, second_item properities
+    // first_item and second_item is now just page ID, get the properties id from await getPropertiesID()
     for (const[k,v] of Object.entries(first_item.properties)) {
         try {
             const first = await notion.pages.properties.retrieve({ page_id: first_item.id, property_id: v.id });
             const second = await notion.pages.properties.retrieve({ page_id: second_item.id, property_id: v.id });
-            if (JSON.stringify(first) != JSON.stringify(second)) {
+            if (!isEqual(first, second)) {
                 return false;
             }
         } catch {
@@ -53,12 +124,12 @@ async function hasSameProperities(first_item, second_item) {
 function isEqual(first, second) {
     return JSON.stringify(first) == JSON.stringify(second)
 }
-
-
+async function setProperties() {
+    properties = getPropertiesID();
+}
 async function getTags() {
     const database = await notion.databases.retrieve({database_id: process.env.NOTION_DATABASE_ID})
     return database.properties.Module.select.options.map(option => {return {id: option.id, name: option.name}})
-
 }
 
 function notionProperitiesByID(properities) {
@@ -69,7 +140,7 @@ function notionProperitiesByID(properities) {
 }
 
 function createTask({title,lessonType,remarks,start, end, module}){
-    console.log(start,end);
+    //console.log(start,end);
     notion.pages.create({
         parent: {
             database_id: process.env.NOTION_DATABASE_ID
@@ -126,4 +197,5 @@ module.exports = {
     createTask
 }
 
-//removeDuplicates()
+setProperties();
+removeDuplicates();

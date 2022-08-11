@@ -144,3 +144,10 @@ function getCurrentDateString() {
 }
 
 //addMyLessons()
+//addMyLessons()
+
+/**
+ * Integrate to a local host webpage
+ * Button to add task --> Display an error / Ask user to deconflict their schedule if there is another task at that time
+ * Button to remove Duplicates
+ */
