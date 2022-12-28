@@ -3,13 +3,11 @@ const {createTask} = require("./notion")
 const YEAR = "2022-2023";
 const STARTING_DATES = ["08-08-2022","01-09-2023","05-08-2023","06-19-2023"]
 
-function getSemester() {
-    const context = process.env.NUS_MODS_ID;
+function getSemester(context) {
     const sem = context.match(/sem-(.*)\/share?/)[1];
     return sem;
 }
-function getModules() {
-    const context = process.env.NUS_MODS_ID;
+function getModules(context) {
     const mods = context.match(/share?(.*)/)[1].slice(1);
     return mods;
 }
@@ -43,8 +41,8 @@ function getMyModules() {
 }
 
 function addMyLessons() {
-    const sem = getSemester();
-    const modList = getMyModules();;
+    const sem = getSemester(process.env.NUS_MODS_ID);
+    const modList = getMyModules(process.env.NUS_MODS_ID);;
     const res = {};
     for (const[k,v] of Object.entries(modList)) {
         res[k] = {};
@@ -144,3 +142,5 @@ function getCurrentDateString() {
 }
 
 //addMyLessons()
+console.log(getSemester(process.env.NUS_MODS_ID))
+console.log(getModules(process.env.NUS_MODS_ID))

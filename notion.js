@@ -125,5 +125,3 @@ function createTask({title,lessonType,remarks,start, end, module}){
 module.exports = {
     createTask
 }
-
-//removeDuplicates()
