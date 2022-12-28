@@ -18,9 +18,22 @@
         <div class="container my-4">
             <h2>Filling up of timetable </h2>
             <h3>Input NUS Mod Link</h3>
-            <h3>Button for semester</h3>
-            <h3>Input for start date</h3>
+            <h3>Input for start date (TODO)</h3>
             <h3>Button for complete submission(auto fill up notion timetable) </h3>
+        </div>
+
+        
+        <div class="container my-4">
+            <h1> Add timetable</h1>
+            <form action="/add-timetable" method = "POST" class = "border-bottom">
+                <div class="row">
+                    <div class="col-12 col-md mb=3">
+                        <label for="link">NUSMOD Link</label>
+                        <input type="text" name = "link" id="link" required class="form-control">
+                    </div>                
+                </div>
+                <button type = "submit" class="btn btn-primary mb-3">Add timetable</button>
+            </form>
         </div>
 
         <div class="container my-4">
@@ -32,6 +45,13 @@
             <h3>Button for complete submission(auto fill up notion timetable) </h3>
         </div>
 
+        <div class="container my-4">
+            <h1> Delete All</h1>
+            <form action="/delete-all" method = "POST" class = "border-bottom">
+                <button type = "submit" class="btn btn-primary mb-3">Delete All</button>
+            </form>
+        </div>
+        
         
         <div class="container my-4">
             <h2>Clearing of events from start date to end date</h2>
@@ -48,3 +68,9 @@
         </div>
     </body>
 </html>
+
+<!-- 
+ * Integrate to a local host webpage
+ * Button to add task -> Display an error / Ask user to deconflict their schedule if there is another task at that time
+ * Button to remove Duplicates
+-->

@@ -26,9 +26,10 @@ async function getSortedDatabase() {
 
 async function makeSortingConditions() {
     var conditions = []
-    await properties.then(res => res.forEach(property => conditions.push({property: property, direction: "ascending"})))   
+    await getPropertiesID().then(res => {res.forEach(property => conditions.push({property: property, direction: "ascending"}))})   
     return conditions;
 }
+
 async function getDatabaseItemsBy(property, reverse = false) {
     let hasMoreItems = true;
     
@@ -57,6 +58,13 @@ async function getDatabaseItems() {
     //console.log(res.map(x => {return {id:x.id, url:x.url}}));
     return res.map(x => {return x.id});
     
+}
+
+async function deleteAll() {
+    const items = await getDatabaseItems();
+    for (let i = 0; i < items.length; i++) {
+        notion.blocks.delete({block_id:items[i]})
+    }
 }
 
 async function removeDuplicates() {
@@ -140,7 +148,7 @@ function notionProperitiesByID(properities) {
 }
 
 function createTask({title,lessonType,remarks,start, end, module}){
-    //console.log(start,end);
+    console.log(title,lessonType,remarks,start, end, module);
     notion.pages.create({
         parent: {
             database_id: process.env.NOTION_DATABASE_ID
@@ -194,11 +202,6 @@ function createTask({title,lessonType,remarks,start, end, module}){
 
 
 module.exports = {
-    createTask
+    createTask,
+    deleteAll
 }
-<<<<<<< HEAD
-=======
-
-setProperties();
-removeDuplicates();
->>>>>>> 5f341e5d4286e254bc2ce1105204a7bd44e7ec7d

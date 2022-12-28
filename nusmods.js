@@ -18,9 +18,9 @@ function getModuleInfo(year, module_code) {
     return query;
 }
 
-function getMyModules() {
+function getMyModules(link) {
     const separator = "&";
-    const mods = getModules().split(separator);
+    const mods = getModules(link).split(separator);
     var res = {};
     for (let i = 0; i < mods.length; i++) {
         const mod = mods[i];
@@ -40,9 +40,9 @@ function getMyModules() {
     return res
 }
 
-function addMyLessons() {
-    const sem = getSemester(process.env.NUS_MODS_ID);
-    const modList = getMyModules(process.env.NUS_MODS_ID);;
+function addMyLessons(link) {
+    const sem = getSemester(link);
+    const modList = getMyModules(link);;
     const res = {};
     for (const[k,v] of Object.entries(modList)) {
         res[k] = {};
@@ -141,6 +141,11 @@ function getCurrentDateString() {
     return currentDate.toISOString();
 }
 
-//addMyLessons()
-console.log(getSemester(process.env.NUS_MODS_ID))
-console.log(getModules(process.env.NUS_MODS_ID))
+
+
+
+//addMyLessons("https://nusmods.com/timetable/sem-2/share?CS2105=LEC:1,TUT:04&CS2106=LAB:11,TUT:13,LEC:2&CS2107=LEC:1,TUT:01&GESS1025=TUT:D34&LSM1301=LEC:1,LAB:3")
+
+module.exports = {
+    addMyLessons
+}
