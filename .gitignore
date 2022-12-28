@@ -1,3 +1,8 @@
 # Ignore node_modules folder
 node_modules
+<<<<<<< HEAD
+=======
+
+#Ignore .env
+>>>>>>> 5f341e5d4286e254bc2ce1105204a7bd44e7ec7d
 .env
