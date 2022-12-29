@@ -3,7 +3,7 @@ const express = require('express')
 const notion = require("./notion")
 const nusmods = require("./nusmods")
 const app = express()
-const {deleteAll, removeDuplicates} = require("./notion")
+const {deleteAll, deleteBetween, removeDuplicates} = require("./notion")
 const {addMyLessons} = require("./nusmods")
 
 app.set("views", "./views")
@@ -18,6 +18,13 @@ app.post('/add-timetable', async (req, res) => {
     await addMyLessons(link)
     res.redirect("/")
 })
+
+app.post('/delete-between', async (req, res) => {
+    const {start, end = []} = req.body
+    await deleteBetween(new Date(start), new Date(end))
+    res.redirect("/")
+})
+
 
 app.post('/delete-all', async (req, res) => {
     await deleteAll()

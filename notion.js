@@ -20,10 +20,6 @@ async function getPropertiesID() {
     return Object.values(properties).map(property => {return property.id});
 }
 
-async function getSortedDatabase() {
-
-}
-
 async function makeSortingConditions() {
     var conditions = []
     await getPropertiesID().then(res => {res.forEach(property => conditions.push({property: property, direction: "ascending"}))})   
@@ -31,8 +27,6 @@ async function makeSortingConditions() {
 }
 
 async function getDatabaseItemsBy(property, reverse = false) {
-    let hasMoreItems = true;
-    
     const response = await notion.databases.query({database_id: process.env.NOTION_DATABASE_ID, sorts: [{
         property: property,
         direction: reverse ? "descending" : "ascending"
@@ -58,6 +52,20 @@ async function getDatabaseItems() {
     //console.log(res.map(x => {return {id:x.id, url:x.url}}));
     return res.map(x => {return x.id});
     
+}
+
+async function deleteBetween(start, end) {
+    console.log(start);
+    console.log(end);
+    const items = await getDatabaseItems();
+    for (let i = 0; i < items.length; i++) {
+        date = await notion.pages.properties.retrieve({ page_id: items[i], property_id: "Date" });
+        start_date = new Date(date["date"]["start"])
+        end_date = new Date(date["date"]["end"])
+        if (start <= start_date && end_date <= end) {
+            notion.blocks.delete({block_id:items[i]})
+        }
+    }
 }
 
 async function deleteAll() {
@@ -114,19 +122,6 @@ async function hasSameProperities(first_item, second_item) {
     
     //TODO: remove first_item.properities, second_item properities
     // first_item and second_item is now just page ID, get the properties id from await getPropertiesID()
-    for (const[k,v] of Object.entries(first_item.properties)) {
-        try {
-            const first = await notion.pages.properties.retrieve({ page_id: first_item.id, property_id: v.id });
-            const second = await notion.pages.properties.retrieve({ page_id: second_item.id, property_id: v.id });
-            if (!isEqual(first, second)) {
-                return false;
-            }
-        } catch {
-            console.log("page has been deleted")
-            return false;
-        }
-    }
-    return true;
 }
 
 function isEqual(first, second) {
@@ -204,5 +199,6 @@ async function createTask({title,lessonType,remarks,start, end, module}){
 module.exports = {
     createTask,
     deleteAll,
+    deleteBetween,
     removeDuplicates
 }

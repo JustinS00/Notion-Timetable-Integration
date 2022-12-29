@@ -17,7 +17,7 @@
 
         <div class="container my-4">
             <h2>Filling up of timetable </h2>
-            <h3>Input NUS Mod Link</h3>
+            <h3>Input NUS Mod Link (Done)</h3>
             <h3>Input for start date (TODO)</h3>
             <h3>Button for complete submission(auto fill up notion timetable) </h3>
         </div>
@@ -45,22 +45,6 @@
             <h3>Button for complete submission(auto fill up notion timetable) </h3>
         </div>
 
-        <div class="container my-4">
-            <h1> Delete All</h1>
-            <form action="/delete-all" method = "POST" class = "border-bottom">
-                <button type = "submit" class="btn btn-primary mb-3">Delete All</button>
-            </form>
-        </div>
-        
-        
-        <div class="container my-4">
-            <h2>Clearing of events from start date to end date</h2>
-            
-            <h3>Input start date</h3>
-            <h3>Input end date</h3>
-            <h3>Button for clearing of activities</h3>
-        </div>
-
 
         <div class="container my-4">
             <h2>Remove of duplicates</h2>
@@ -68,7 +52,27 @@
             <form action="/remove-duplicates" method = "POST" class = "border-bottom">
                 <button type = "submit" class="btn btn-primary mb-3">Remove duplicates</button>
             </form>
+        </div>
 
+        <div class="container my-4">
+            <h1> Delete Between</h1>
+            <form action="/delete-between" method = "POST" class = "border-bottom">
+
+                <label for="start">Start Date</label>
+                <input type="date" name = "start" id="start" required class="form-control">
+
+                <label for="end">End Date</label>
+                <input type="date" name = "end" id="end" required class="form-control">
+
+                <button type = "submit" class="btn btn-primary mb-3">Delete Between</button>
+            </form>
+        </div>
+
+        <div class="container my-4">
+            <h1> Delete All</h1>
+            <form action="/delete-all" method = "POST" class = "border-bottom">
+                <button type = "submit" class="btn btn-primary mb-3">Delete All</button>
+            </form>
         </div>
     </body>
 </html>
