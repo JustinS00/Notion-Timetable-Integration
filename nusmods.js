@@ -50,7 +50,7 @@ function addMyLessons(link) {
         const semData = modData.then(data => {return data.semesterData[sem - 1].timetable;});
         for (const[lessonType, lessonNo] of Object.entries(v)){
             res[k][lessonType] = semData.then(data => {return data.filter(x => x.classNo == lessonNo && x.lessonType.toLowerCase().includes(lessonType.toLowerCase()));})
-                .then(x => x.map(lesson => {addLessons(sem, k, lesson); /*console.log(lesson)*/;}));
+                .then(x => x.map(async lesson => {await addLessons(sem, k, lesson); /*console.log(lesson)*/;}));
             /* for each lesson in array
                 for each week in weeks
                     1. find the date
@@ -119,19 +119,20 @@ function getLessonType(lessonType) {
     }
 
 }
-function addLessons(semester, moduleName, lesson) {
+
+async function addLessons(semester, moduleName, lesson) {
     const weeks = lesson.weeks;
     const lessonTitle = moduleName + " " + lesson.lessonType;
     const lessonType = getLessonType(lesson.lessonType);
     const remarks = lesson.venue;
-    weeks.map(week => {
+    weeks.map(async week => {
         const date = getDate(semester, lesson.day, week);
         const dateTimeStart = date + parseTime(lesson.startTime);
         const dateTimeEnd = date + parseTime(lesson.endTime);
         //console.log(dateTimeStart)
         //console.log(dateTimeEnd)
         if (dateTimeEnd > getCurrentDateString()) 
-            createTask({title: lessonTitle, lessonType: lessonType, remarks: remarks, start: dateTimeStart, end: dateTimeEnd ,module: moduleName});
+            await createTask({title: lessonTitle, lessonType: lessonType, remarks: remarks, start: dateTimeStart, end: dateTimeEnd ,module: moduleName});
     })
 }
 

@@ -147,7 +147,7 @@ function notionProperitiesByID(properities) {
     }, {})
 }
 
-function createTask({title,lessonType,remarks,start, end, module}){
+async function createTask({title,lessonType,remarks,start, end, module}){
     console.log(title,lessonType,remarks,start, end, module);
     notion.pages.create({
         parent: {
