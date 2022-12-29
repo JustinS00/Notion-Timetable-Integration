@@ -97,7 +97,7 @@ async function removeDuplicates() {
 }
 
 async function hasSameProperities(first_item, second_item) {
-    const props = await properties;
+    const props = await getPropertiesID();
     for (const property of props) {
         try {
             const first = await notion.pages.properties.retrieve({ page_id: first_item, property_id: property });
@@ -203,5 +203,6 @@ async function createTask({title,lessonType,remarks,start, end, module}){
 
 module.exports = {
     createTask,
-    deleteAll
+    deleteAll,
+    removeDuplicates
 }

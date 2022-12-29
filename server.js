@@ -3,7 +3,7 @@ const express = require('express')
 const notion = require("./notion")
 const nusmods = require("./nusmods")
 const app = express()
-const {deleteAll} = require("./notion")
+const {deleteAll, removeDuplicates} = require("./notion")
 const {addMyLessons} = require("./nusmods")
 
 app.set("views", "./views")
@@ -21,6 +21,11 @@ app.post('/add-timetable', async (req, res) => {
 
 app.post('/delete-all', async (req, res) => {
     await deleteAll()
+    res.redirect("/")
+})
+
+app.post('/remove-duplicates', async (req, res) => {
+    await removeDuplicates()
     res.redirect("/")
 })
 
