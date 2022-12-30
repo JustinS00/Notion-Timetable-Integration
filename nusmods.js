@@ -1,21 +1,45 @@
 const {createTask} = require("./notion")
 
-const YEAR = "2022-2023";
-const STARTING_DATES = ["08-08-2022","01-09-2023","05-08-2023","06-19-2023"]
+//mm-dd-yyyy
+const STARTING_DATES = {
+    "2022-2023": ["08-08-2022","01-09-2023","05-08-2023","06-19-2023"],
+    "2023-2024": ["08-15-2023","01-15-2024","05-13-2024","06-24-2024"],
+    "2024-2025": ["08-12-2024","01-13-2025","05-12-2025","06-23-2025"],
+    "2025-2026": ["08-11-2025","01-12-2026","05-11-2026","06-22-2026"],
+}
+
+const SEMESTER = {
+    "sem-1": 1,
+    "sem-2": 2,
+    "st-i": 3,
+    "st-ii": 4,
+}
 
 function getSemester(context) {
-    const sem = context.match(/sem-(.*)\/share?/)[1];
-    return sem;
+    const pattern = /https:\/\/nusmods.com\/timetable\/(.*)\/share\?(.*)/
+    if (pattern.test(context)) {
+        const matches = context.match(pattern)
+        const sem = matches[1]
+        if (sem in SEMESTER) {
+            return SEMESTER[sem]
+        }
+    }
+    
+    //const sem = context.match(/sem-(.*)\/share?/)[1];
+    //return sem;
 }
 function getModules(context) {
-    const mods = context.match(/share?(.*)/)[1].slice(1);
-    return mods;
+    const pattern = /https:\/\/nusmods.com\/timetable\/(.*)\/share\?(.*)/
+    if (pattern.test(context)) {
+        const matches = context.match(pattern)
+        const mods = matches[2]
+        return mods
+    }
 }
 
 function getModuleInfo(year, module_code) {
     const path = [process.env.NUS_MODS_API] + year + "/modules/" + module_code + ".json";
-    var query = fetch(path).then((response) => response.json()).then((data) => {console.log(module_code + " is successfully retrived"); return data});
-    return query;
+    return fetch(path).then((response) => response.json()).then((data) => {console.log(module_code + " is successfully retrived"); return data}).catch(error => console.log("Warning: " + error))
 }
 
 function getMyModules(link) {
@@ -40,23 +64,24 @@ function getMyModules(link) {
     return res
 }
 
-function addMyLessons(link) {
+function addMyLessons(link, academic_year) {
     const sem = getSemester(link);
     const modList = getMyModules(link);;
     const res = {};
     for (const[k,v] of Object.entries(modList)) {
         res[k] = {};
-        const modData = getModuleInfo(YEAR, k);
-        const semData = modData.then(data => {return data.semesterData[sem - 1].timetable;});
+        const modData = getModuleInfo(parseYear(academic_year), k);
+        const semData = modData.then(data => {return data.semesterData[sem - 1].timetable;}).catch(err => console.log(err));
         for (const[lessonType, lessonNo] of Object.entries(v)){
             res[k][lessonType] = semData.then(data => {return data.filter(x => x.classNo == lessonNo && x.lessonType.toLowerCase().includes(lessonType.toLowerCase()));})
-                .then(x => x.map(async lesson => {await addLessons(sem, k, lesson); /*console.log(lesson)*/;}));
+                .then(x => x.map(async lesson => {await addLessons(parseYear(academic_year),sem, k, lesson); /*console.log(lesson)*/;})).catch(err => console.log(err));
             /* for each lesson in array
                 for each week in weeks
                     1. find the date
                     2. add to notion
             */
         }
+
     }
     return res
 }
@@ -66,8 +91,9 @@ Date.prototype.addDays = function(days) {
     return this;
 };
 
-function getDate(semester, day, week) {
-    var res = new Date(STARTING_DATES[semester - 1]);
+function getDate(year, semester, day, week) {
+    //TODO
+    var res = new Date(STARTING_DATES[year][semester - 1]);
     res.setTime(res.getTime() + 8 * 60 * 60 * 1000)
     //console.log(res)
     var add = week <= 6 ? (week - 1) * 7 : week * 7;
@@ -101,6 +127,10 @@ function parseTime(time) {
     return res
 }
 
+function parseYear(year) {
+    return year.replaceAll("AY", "")
+}
+
 function getLessonType(lessonType) {
     switch (lessonType.toLowerCase()) {
         case "lecture":
@@ -120,17 +150,15 @@ function getLessonType(lessonType) {
 
 }
 
-async function addLessons(semester, moduleName, lesson) {
+async function addLessons(year, semester, moduleName, lesson) {
     const weeks = lesson.weeks;
     const lessonTitle = moduleName + " " + lesson.lessonType;
     const lessonType = getLessonType(lesson.lessonType);
     const remarks = lesson.venue;
     weeks.map(async week => {
-        const date = getDate(semester, lesson.day, week);
+        const date = getDate(year, semester, lesson.day, week);
         const dateTimeStart = date + parseTime(lesson.startTime);
         const dateTimeEnd = date + parseTime(lesson.endTime);
-        //console.log(dateTimeStart)
-        //console.log(dateTimeEnd)
         if (dateTimeEnd > getCurrentDateString()) 
             await createTask({title: lessonTitle, lessonType: lessonType, remarks: remarks, start: dateTimeStart, end: dateTimeEnd ,module: moduleName});
     })
@@ -143,10 +171,13 @@ function getCurrentDateString() {
 }
 
 
-
-
 //addMyLessons("https://nusmods.com/timetable/sem-2/share?CS2105=LEC:1,TUT:04&CS2106=LAB:11,TUT:13,LEC:2&CS2107=LEC:1,TUT:01&GESS1025=TUT:D34&LSM1301=LEC:1,LAB:3")
 
 module.exports = {
     addMyLessons
 }
+
+console.log(getSemester("https://nusmods.com/timetable/st-ii/share?"))
+console.log(getSemester("https://nusmods.com/timetable/sem-2/share?CS2105=LEC:1,TUT:04&CS2106=LAB:11,TUT:13,LEC:2&CS2107=LEC:1,TUT:01&GESS1025=TUT:D34&LSM1301=LEC:1,LAB:3"))
+console.log(getModules("https://nusmods.com/timetable/st-ii/share?"))
+console.log(getModules("https://nusmods.com/timetable/sem-2/share?CS2105=LEC:1,TUT:04&CS2106=LAB:11,TUT:13,LEC:2&CS2107=LEC:1,TUT:01&GESS1025=TUT:D34&LSM1301=LEC:1,LAB:3"))

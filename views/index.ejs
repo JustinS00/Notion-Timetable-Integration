@@ -10,18 +10,6 @@
 
     <body>
         <h1> Notion TimeTable Integration </h1>
-
-        <div class="container my-4">
-            <h2>Adding an event </h2>
-        </div>
-
-        <div class="container my-4">
-            <h2>Filling up of timetable </h2>
-            <h3>Input NUS Mod Link (Done)</h3>
-            <h3>Input for start date (TODO)</h3>
-            <h3>Button for complete submission(auto fill up notion timetable) </h3>
-        </div>
-
         
         <div class="container my-4">
             <h1> Add timetable</h1>
@@ -30,6 +18,15 @@
                     <div class="col-12 col-md mb=3">
                         <label for="link">NUSMOD Link</label>
                         <input type="text" name = "link" id="link" required class="form-control">
+
+                        <label for="academic_year">Academic Year</label>
+                        <select name="academic_year" id="academic_year" required class="form-control">
+                            <option value="AY2022-2023">AY2022-2023</option>
+                            <option value="AY2023-2024">AY2023-2024 (Data Not available) </option>
+                            <option value="AY2024-2025">AY2024-2025 (Data Not available) </option>
+                            <option value="AY2024-2025">AY2025-2026 (Data Not available) </option>
+                        </select>
+
                     </div>                
                 </div>
                 <button type = "submit" class="btn btn-primary mb-3">Add timetable</button>

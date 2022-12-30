@@ -14,8 +14,8 @@ app.get('/', (req, res) => {
 })
 
 app.post('/add-timetable', async (req, res) => {
-    const { link, start_date = [] } = req.body
-    await addMyLessons(link)
+    const {link, academic_year = []} = req.body
+    await addMyLessons(link, academic_year)
     res.redirect("/")
 })
 
