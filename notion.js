@@ -1,4 +1,4 @@
-const {Client} = require("@notionhq/client")
+import { Client } from "@notionhq/client";
 
 const notion = new Client({auth: process.env.NOTION_API_KEY})
 
@@ -54,7 +54,7 @@ async function getDatabaseItems() {
     
 }
 
-async function deleteBetween(start, end) {
+export async function deleteBetween(start, end) {
     console.log(start);
     console.log(end);
     const items = await getDatabaseItems();
@@ -68,14 +68,14 @@ async function deleteBetween(start, end) {
     }
 }
 
-async function deleteAll() {
+export async function deleteAll() {
     const items = await getDatabaseItems();
     for (let i = 0; i < items.length; i++) {
         notion.blocks.delete({block_id:items[i]})
     }
 }
 
-async function removeDuplicates() {
+export async function removeDuplicates() {
     
     //const items = await getDatabaseItemsBy("Date").then(res => {return res.results.map(x => {return {id: x.id, properties: x.properties}})});
     const items = await getDatabaseItems();
@@ -142,8 +142,7 @@ function notionProperitiesByID(properities) {
     }, {})
 }
 
-async function createTask({title,lessonType,remarks,start, end, module}){
-    console.log(title,lessonType,remarks,start, end, module);
+export async function createTask({title,lessonType,remarks,start, end, module}){
     notion.pages.create({
         parent: {
             database_id: process.env.NOTION_DATABASE_ID
@@ -195,10 +194,9 @@ async function createTask({title,lessonType,remarks,start, end, module}){
     })
 }
 
-
-module.exports = {
+export default {
     createTask,
     deleteAll,
     deleteBetween,
     removeDuplicates
-}
+  };

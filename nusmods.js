@@ -1,9 +1,7 @@
-const {createTask} = require("./notion")
-
+import fetch from 'node-fetch';
+import {createTask} from './notion.js';
 //mm-dd-yyyy
 const STARTING_DATES = {
-    "2022-2023": ["08-08-2022","01-09-2023","05-08-2023","06-19-2023"],
-    "2023-2024": ["08-15-2023","01-15-2024","05-13-2024","06-24-2024"],
     "2024-2025": ["08-12-2024","01-13-2025","05-12-2025","06-23-2025"],
     "2025-2026": ["08-11-2025","01-12-2026","05-11-2026","06-22-2026"],
 }
@@ -37,9 +35,18 @@ function getModules(context) {
     }
 }
 
-function getModuleInfo(year, module_code) {
+async function getModuleInfo(year, module_code) {
     const path = [process.env.NUS_MODS_API] + year + "/modules/" + module_code + ".json";
-    return fetch(path).then((response) => response.json()).then((data) => {console.log(module_code + " is successfully retrived"); return data}).catch(error => console.log("Warning: " + error))
+    console.log(path);
+    
+    try {
+        const response = await fetch(path)
+        const data = await response.json()
+        console.log(module_code + " is successfully retrived")
+        return data
+    } catch (error) {
+        return console.log("Warning: " + error)
+    }
 }
 
 function getMyModules(link) {
@@ -64,7 +71,7 @@ function getMyModules(link) {
     return res
 }
 
-function addMyLessons(link, academic_year) {
+export function addMyLessons(link, academic_year) {
     const sem = getSemester(link);
     const modList = getMyModules(link);;
     const res = {};
@@ -170,14 +177,6 @@ function getCurrentDateString() {
     return currentDate.toISOString();
 }
 
-
-//addMyLessons("https://nusmods.com/timetable/sem-2/share?CS2105=LEC:1,TUT:04&CS2106=LAB:11,TUT:13,LEC:2&CS2107=LEC:1,TUT:01&GESS1025=TUT:D34&LSM1301=LEC:1,LAB:3")
-
-module.exports = {
-    addMyLessons
-}
-
-console.log(getSemester("https://nusmods.com/timetable/st-ii/share?"))
-console.log(getSemester("https://nusmods.com/timetable/sem-2/share?CS2105=LEC:1,TUT:04&CS2106=LAB:11,TUT:13,LEC:2&CS2107=LEC:1,TUT:01&GESS1025=TUT:D34&LSM1301=LEC:1,LAB:3"))
-console.log(getModules("https://nusmods.com/timetable/st-ii/share?"))
-console.log(getModules("https://nusmods.com/timetable/sem-2/share?CS2105=LEC:1,TUT:04&CS2106=LAB:11,TUT:13,LEC:2&CS2107=LEC:1,TUT:01&GESS1025=TUT:D34&LSM1301=LEC:1,LAB:3"))
+export default {
+    addMyLessons,
+  };

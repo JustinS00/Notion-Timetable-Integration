@@ -1,11 +1,9 @@
-require('dotenv').config()
-const express = require('express')
-const notion = require("./notion")
-const nusmods = require("./nusmods")
-const app = express()
-const {deleteAll, deleteBetween, removeDuplicates} = require("./notion")
-const {addMyLessons} = require("./nusmods")
+import 'dotenv/config';
+import express from 'express';
+import { deleteAll, deleteBetween, removeDuplicates } from './notion.js';
+import { addMyLessons } from './nusmods.js';
 
+const app = express();
 app.set("views", "./views")
 app.set("view engine", "ejs")
 app.use(express.urlencoded({extended: true}))
